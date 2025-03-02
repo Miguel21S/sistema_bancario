@@ -21,7 +21,7 @@ while True:
         if depositar > 0:
             saldo += depositar
             extrato += f"\nDeposito: + R$ {depositar} "
-            print(f"Deposito realizado. Saldo actual: R$ {saldo}")
+            print(f"Deposito realizado com successo. Saldo actual: R$ {saldo}")
 
     elif valor == 2:
         if count_saque < LIMITE_DE_SAQUES:
