@@ -1,3 +1,9 @@
+## Para a realização do projecto, se utilizou a linguagem Python
+
+<a href="https://www.python.org/">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
+</a>
+
 ## Desafio: Criando um sistema bancário
 
 ## Objetivo Geral
