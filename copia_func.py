@@ -4,22 +4,24 @@ from datetime import datetime
 SAQUE_MAXIMO = 500
 LIMITE_DE_SAQUES = 3
 LIMITE_DIARIO = 10
+
+def verificar_novo_dia(ultima_data, count_saque, count_limite_diario):
+    hoje = datetime.now().date()
+    if hoje > ultima_data:
+        return hoje, 0,0
+    return ultima_data, count_saque, count_limite_diario
     
-def deposito(saldo, extrato, ultima_data, depositar):
+def deposito(saldo, extrato, depositar):
     if depositar <= 0:
         print("Valor inválido para depósito.")
         return saldo, extrato
 
-    hoje = datetime.now().date()
-    if hoje >= ultima_data:
-        saldo += depositar
-        extrato += f"\nDepósito: + R$ {depositar} : {hoje} "
-        print(f"Depósito realizado com sucesso. Saldo atual: R$ {saldo}")
-        print(f"Data: {hoje}")
-        return saldo, extrato, ultima_data
-    else:
-        print("Alcansaste o máximo das operações diaria")
-        return ultima_data
+    agora = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+    
+    saldo += depositar
+    extrato += f"\nDepósito: + R$ {depositar} {agora}"
+    print(f"Depósito realizado com sucesso. Saldo atual: R$ {saldo}")
+    return saldo, extrato
 
 def levantamento(saldo, extrato, sacar, count_saque):
     if sacar <= 0:
@@ -38,9 +40,10 @@ def levantamento(saldo, extrato, sacar, count_saque):
         print("Has superado o valor máximo de saque.")
         return saldo, extrato, count_saque
     
+    agora = datetime.now().strftime("%D-%M-%Y %H:%M:%S")
     saldo -= sacar
     count_saque+=1
-    extrato += f"\nSaque: - R$ {sacar} "
+    extrato += f"\nSaque: - R$ {sacar} {agora}"
     print(f"Saque realizado com sucesso. saldo atual: R$ {saldo}")
     print(f"Tens direito a 3 saques diario. Número de saques: {count_saque}/3")
         
@@ -76,6 +79,8 @@ def conta_bancaria():
         valor = int(input("Digite o número da operação: "))
         
         if valor == 1:
+            ultima_data, count_saque, count_limite_diario = verificar_novo_dia(ultima_data, count_saque, count_limite_diario)
+
             if count_limite_diario >= LIMITE_DIARIO:
                 print("Você atingiu o limite diário de transações (10).")
                 continue
@@ -86,7 +91,7 @@ def conta_bancaria():
                 
                 if valor_1_2 == 1:
                     depositar = int(input("Digite a quantia a depositar: "))
-                    saldo, extrato, ultima_data = deposito(saldo, extrato, ultima_data, depositar)
+                    saldo, extrato = deposito(saldo, extrato, depositar)
                     count_limite_diario += 1
                     print(f"Limite diario: {count_limite_diario}/10")
                                     
