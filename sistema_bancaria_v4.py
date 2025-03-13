@@ -6,21 +6,77 @@ DRAW_LIMIT = 3
 DAY_LIMIT = 10
 
 def create_user(user):
-    user_data = {}
-    user_data["nome"] = input("Digite seu nome: ")
-    user_data["birth_data"] = input("Digite sua data de nascimento (DD/MM/AAAA): ")
-    user_data["address"] = input("Digite seu endereço: ")
-    user_data["cbf"] = input("Digite seu CBF: ")
-
-    user.append(user_data)
+    user_data = {
+        "name": input("Digite seu nome: "),
+        "birth_data": input("Digite sua data de nascimento (DD/MM/AAAA): "),
+        "cbf": input("Digite seu CBF: "),
+        "address": {
+            "logrador": input("Digite seu logrador: "),
+            "Nº": input("Digite nº do seu bairro: "),
+            "Bairro": input("Digite seu Bairro: "),
+            "Cidade": input("Digite sua cidade/inicial do estado1: "),
+            }
+    }
+    
+    if any(us["name"] == user_data["name"] for us in user):
+        print("Este usuário já está cadastrado")
+    elif any(cbf["cbf"] == user_data["cbf"] for cbf in user):
+        print("O nº do CBF já existe")
+    else:
+        user.append(user_data)
+        print("Usuário cadastrado com successo")
     return user
 
-def check_new_day(last_date, withdrawal_count, daily_count_limit):
-    today = datetime.now().date()
-    if today > last_date:
-        return today, 0,0
-    return last_date, withdrawal_count, daily_count_limit
+def creat_account_bank(an, user, count):
+    # count+=1
+    agency_account = {
+        "Agency": input("Digite o nome do banco: "),
+        "User Name": input("Digite seu nome: "),
+    }
     
+    agency_account["Number Account"] = "000" + count
+    if not any(us["name"] == agency_account["User Name"] for us in user):
+        print("Este usuário não está cadastrado")
+        return an
+    
+    if any(account["Number Account"] == agency_account["Number Account"] for account in an):
+        print(f"O nº da conta já existe na BD")
+    else:
+        an.append(agency_account)
+        print("Conta criada com successo")
+         
+    return f"\nEstou dentro: {an}"
+
+def filter_user_in_account(cbf, user, account):
+    usuario = next((u for u in user if u["cbf"] == cbf), None)
+    
+    if not usuario:
+        print("Usuário não encontrado.")
+        return
+    
+    print("\n Usuário encontrado:")
+    print(usuario)
+
+    contas_do_usuario = [acc for acc in account if acc["User Name"] == usuario["name"]]
+    
+    if contas_do_usuario:
+        print("\n Contas associadas:")
+        for conta in contas_do_usuario:
+            print(conta)
+    else:
+        print("\n Este usuário não possui contas cadastradas.")
+
+
+def list_account_and_users(accounts_users):
+    if accounts_users:
+        print("\n Lista de cadastrada:")
+        for u in accounts_users:
+            print(u)
+    else:
+        print("\nNão há registros de cadastrados.")
+
+    
+   
 def deposited(credit_balance, extract, deposit):
     if deposit <= 0:
         print("Valor inválido para depósito.")
@@ -33,7 +89,7 @@ def deposited(credit_balance, extract, deposit):
     print(f"Depósito realizado com sucesso. saldo atual: R$ {credit_balance}")
     return credit_balance, extract
 
-def withdrawal(credit_balance, extract, withdraw, withdrawal_count):
+def withdrawal(credit_balance = "credit_balance", extract = "extract", withdraw = "withdraw", withdrawal_count = "withdrawal_count"):
     if withdraw <= 0:
         print("Valor inválido para saque.")
         return credit_balance, extract, withdrawal_count
@@ -59,7 +115,7 @@ def withdrawal(credit_balance, extract, withdraw, withdrawal_count):
         
     return credit_balance, extract, withdrawal_count
         
-def bank_statement(credit_balance, extract):
+def bank_statement(credit_balance, extract = "extract"):
     print("\n" + " Extracto Bancario ".center(50, "="))
     print(extract if extract else "Nenhuma transação realizada.")
     print(f"Saldo atual: R$ {credit_balance}")
