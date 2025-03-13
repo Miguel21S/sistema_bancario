@@ -1,10 +1,14 @@
 from datetime import datetime
 
-
 MAX_WITHDRAWAL = 500
 DRAW_LIMIT = 3
 DAY_LIMIT = 10
-
+def check_new_day(last_date, withdrawal_count, daily_count_limit):
+     today = datetime.now().date()
+     if today > last_date:
+         return today, 0,0
+     return last_date, withdrawal_count, daily_count_limit
+ 
 def create_user(user):
     user_data = {
         "name": input("Digite seu nome: "),
@@ -27,7 +31,7 @@ def create_user(user):
         print("Usuário cadastrado com successo")
     return user
 
-def creat_account_bank(an, user, count):
+def creat_account_bank(agency_data, user, count, available_balance):
     # count+=1
     agency_account = {
         "Agency": input("Digite o nome do banco: "),
@@ -35,17 +39,18 @@ def creat_account_bank(an, user, count):
     }
     
     agency_account["Number Account"] = "000" + count
+    agency_account["Available balance"] = available_balance
     if not any(us["name"] == agency_account["User Name"] for us in user):
         print("Este usuário não está cadastrado")
-        return an
+        return agency_data
     
-    if any(account["Number Account"] == agency_account["Number Account"] for account in an):
+    if any(account["Number Account"] == agency_account["Number Account"] for account in agency_data):
         print(f"O nº da conta já existe na BD")
     else:
-        an.append(agency_account)
+        agency_data.append(agency_account)
         print("Conta criada com successo")
          
-    return f"\nEstou dentro: {an}"
+    return f"\nEstou dentro: {agency_data}"
 
 def filter_user_in_account(cbf, user, account):
     usuario = next((u for u in user if u["cbf"] == cbf), None)
@@ -74,46 +79,62 @@ def list_account_and_users(accounts_users):
             print(u)
     else:
         print("\nNão há registros de cadastrados.")
-
     
    
-def deposited(credit_balance, extract, deposit):
+def deposited(extract, number_account, account, deposit):
+    check_account = next((count for count in account if count["Number Account"] == number_account), None)
+
+    if not check_account:
+        print("Esta conta não existe.")
+        return check_account["Available balance"], extract
+
     if deposit <= 0:
         print("Valor inválido para depósito.")
-        return credit_balance, extract
+        return check_account["Available balance"], extract
 
     today = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-    
-    credit_balance += deposit
-    extract += f"\nDepósito: + R$ {deposit} {today}"
-    print(f"Depósito realizado com sucesso. saldo atual: R$ {credit_balance}")
-    return credit_balance, extract
 
-def withdrawal(credit_balance = "credit_balance", extract = "extract", withdraw = "withdraw", withdrawal_count = "withdrawal_count"):
+    check_account["Available balance"] += deposit
+
+    extract += f"\nDepósito: + R$ {deposit} {today}"
+    print(f"\nDepósito: + R$ {deposit} {today}")
+    print(f"Depósito realizado com sucesso. Saldo atual: R$ {check_account['Available balance']}")
+
+    return check_account["Available balance"], extract
+
+
+def withdrawal(extract, withdraw, withdrawal_count, number_account, account):
+    check_account = next((count for count in account if count["Number Account"] == number_account), None)
+
+    if not check_account:
+        print("Esta conta não existe.")
+        return check_account["Available balance"], extract, withdrawal_count
+
     if withdraw <= 0:
         print("Valor inválido para saque.")
-        return credit_balance, extract, withdrawal_count
+        return check_account["Available balance"], extract, withdrawal_count
 
     if withdrawal_count >= DRAW_LIMIT:
         print("Você atingiu o limite máximo de saques diários (3).")
-        return credit_balance, extract, withdrawal_count
-    
-    if withdraw > credit_balance:
-        print("Não tem saldo  suficiente para realizar a operação.")
-        return credit_balance, extract, withdrawal_count          
-    
+        return check_account["Available balance"], extract, withdrawal_count
+
+    if withdraw > check_account["Available balance"]:
+        print("Não tem saldo suficiente para realizar a operação.")
+        return check_account["Available balance"], extract, withdrawal_count
+
     if withdraw > MAX_WITHDRAWAL:
         print("Has superado o valor máximo de saque.")
-        return credit_balance, extract, withdrawal_count
-    
-    today = datetime.now().strftime("%D-%M-%Y %H:%M:%S")
-    credit_balance -= withdraw
-    withdrawal_count+=1
+        return check_account["Available balance"], extract, withdrawal_count
+
+    today = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+    check_account["Available balance"] -= withdraw
+    withdrawal_count += 1
+
     extract += f"\nSaque: - R$ {withdraw} {today}"
-    print(f"Saque realizado com sucesso. saldo atual: R$ {credit_balance}")
-    print(f"Tens direito a 3 saques diario. Número de saques: {withdrawal_count}/3")
-        
-    return credit_balance, extract, withdrawal_count
+    print(f"Saque realizado com sucesso. Saldo atual: R$ {check_account['Available balance']}")
+    print(f"Tens direito a 3 saques diarios. Número de saques: {withdrawal_count}/3")
+
+    return check_account["Available balance"], extract, withdrawal_count
         
 def bank_statement(credit_balance, extract = "extract"):
     print("\n" + " Extracto Bancario ".center(50, "="))
@@ -121,6 +142,10 @@ def bank_statement(credit_balance, extract = "extract"):
     print(f"Saldo atual: R$ {credit_balance}")
  
 def account_bank():
+    user = []
+    # cbf = []
+    account = []
+    count = 0
     credit_balance = 0
     extract = ""
     withdrawal_count = 0
@@ -129,9 +154,14 @@ def account_bank():
     
     menu = ''' 
     Digite uma das opções
-    1 Depósito o Levantamento
-    2 extracto
-    3 Sair
+    \t1 - Criar usuario
+    \t2 - Criar conta
+    \t3 - Depósito o Levantamento
+    \t4 - Listar Contas
+    \t5 - Listar Usuários
+    \t6 - Filtrar
+    \t7 - extracto
+    \t8 - Sair
     '''
     menu_secundario = ''' 
     Digite uma das opções
@@ -140,11 +170,22 @@ def account_bank():
     3 Cancelar
     '''
     while True:
-        print(menu)
-        
-        valor = int(input("Digite o número da operação: "))
+    
+        try:
+            print(menu)
+            valor = int(input("Digite o número da operação: "))
+        except ValueError:
+            print("Opção inválida! Digite um número.")
+            continue
         
         if valor == 1:
+            create_user(user)
+                    
+        elif valor == 2:
+            count += 1
+            creat_account_bank(account, user, str(count), credit_balance)
+                
+        elif valor == 3:
             last_date, withdrawal_count, daily_count_limit = check_new_day(last_date, withdrawal_count, daily_count_limit)
 
             if daily_count_limit >= DAY_LIMIT:
@@ -156,14 +197,16 @@ def account_bank():
                 valor_1_2 = int(input("Digite o número da operação: "))
                 
                 if valor_1_2 == 1:
+                    number_account = input("Digite o nº da conta: ")
                     deposit = int(input("Digite a quantia a depositar: "))
-                    credit_balance, extract = deposited(credit_balance, extract, deposit)
+                    deposited(extract, number_account, account, deposit)
                     daily_count_limit += 1
                     print(f"Limite diario: {daily_count_limit}/10")
                                     
                 elif valor_1_2 == 2:
+                    number_account = input("Digite o nº da conta: ")
                     withdraw = int(input("Digite a quantia a levantar: "))
-                    credit_balance, extract, new_withdrawal_count  = withdrawal(credit_balance, extract, withdraw, withdrawal_count)
+                    credit_balance, extract, new_withdrawal_count = withdrawal(extract, withdraw, withdrawal_count, number_account, account)
                         
                     if new_withdrawal_count > withdrawal_count:
                         daily_count_limit += 1  
@@ -179,11 +222,17 @@ def account_bank():
                 if daily_count_limit >= DAY_LIMIT:
                     print("Você atingiu o limite diário de transações.")
                     break
-                    
-        elif valor == 2:
+        elif valor == 4:
+            list_account_and_users(account)
+        elif valor == 5:
+            list_account_and_users(user)
+        elif valor == 6:
+            cbf = input("Filtra o cbf: ")
+            filter_user_in_account(cbf, user, account)
+        elif valor == 7:
             bank_statement(credit_balance, extract)
-                
-        elif valor == 3:
+
+        elif valor == 8:
             print("Volta sempre!")
             break
         else:
