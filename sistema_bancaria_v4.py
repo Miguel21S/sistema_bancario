@@ -91,7 +91,7 @@ def deposited(extract, number_account, account, deposit):
 
     if not check_account:
         print("Esta conta não existe.")
-        return check_account["Available balance"], extract
+        return 0, extract
 
     if deposit <= 0:
         print("Valor inválido para depósito.")
@@ -112,7 +112,7 @@ def withdrawal(extract="", withdraw=0, withdrawal_count=0, number_account="", ac
 
     if not check_account:
         print("Esta conta não existe.")
-        return check_account["Available balance"], extract, withdrawal_count
+        return 0, extract, withdrawal_count
 
     if withdraw <= 0:
         print("Valor inválido para saque.")
@@ -204,19 +204,27 @@ def account_bank():
                 if valor_1_2 == 1:
                     number_account = input("Digite o nº da conta: ")
                     deposit = int(input("Digite a quantia a depositar: "))
-                    credit_balance, extract = deposited(extract, number_account, account, deposit)
-                    daily_count_limit += 1
-                    print(f"Limite diario: {daily_count_limit}/10")
+                    if not number_account or deposit <= 0:
+                        print("Número de conta inválida o depósito inválido")
+                        break
+                    else:
+                        credit_balance, extract = deposited(extract, number_account, account, deposit)
+                        daily_count_limit += 1
+                        print(f"Limite diario: {daily_count_limit}/10")
                                     
                 elif valor_1_2 == 2:
                     number_account = input("Digite o nº da conta: ")
                     withdraw = int(input("Digite a quantia a levantar: "))
-                    credit_balance, extract, new_withdrawal_count = withdrawal(extract, withdraw, withdrawal_count, number_account, account)
-                        
-                    if new_withdrawal_count > withdrawal_count:
-                        daily_count_limit += 1  
-                        withdrawal_count = new_withdrawal_count
-                        print(f"Limite diario: {daily_count_limit}/10")
+                    if not number_account or withdraw <= 0:
+                        print("Número de conta inválida o depósito inválido")
+                        break
+                    else:
+                        credit_balance, extract, new_withdrawal_count = withdrawal(extract, withdraw, withdrawal_count, number_account, account)
+                            
+                        if new_withdrawal_count > withdrawal_count:
+                            daily_count_limit += 1  
+                            withdrawal_count = new_withdrawal_count
+                            print(f"Limite diario: {daily_count_limit}/10")
                                     
                 elif valor_1_2 == 3:
                     break
