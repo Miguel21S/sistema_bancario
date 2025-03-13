@@ -3,12 +3,15 @@ from datetime import datetime
 MAX_WITHDRAWAL = 500
 DRAW_LIMIT = 3
 DAY_LIMIT = 10
+
+##########################   METHOD TO CHECK IF IT'S A NEW DAY
 def check_new_day(last_date, withdrawal_count, daily_count_limit):
      today = datetime.now().date()
      if today > last_date:
          return today, 0,0
      return last_date, withdrawal_count, daily_count_limit
- 
+
+##########################   METHOD TO CREATE USER
 def create_user(user):
     user_data = {
         "name": input("Digite seu nome: "),
@@ -31,6 +34,7 @@ def create_user(user):
         print("Usuário cadastrado com successo")
     return user
 
+##########################   METHOD TO CREATE ACCOUNT
 def creat_account_bank(agency_data, user, count, available_balance):
     # count+=1
     agency_account = {
@@ -52,6 +56,7 @@ def creat_account_bank(agency_data, user, count, available_balance):
          
     return f"\nEstou dentro: {agency_data}"
 
+##########################   METHOD FOR FILTERING USER IN ACCOUNT
 def filter_user_in_account(cbf, user, account):
     usuario = next((u for u in user if u["cbf"] == cbf), None)
     
@@ -71,7 +76,7 @@ def filter_user_in_account(cbf, user, account):
     else:
         print("\n Este usuário não possui contas cadastradas.")
 
-
+##########################   METHOD TO LIST USERS AND METHOD TO LIST ACCOUNTS
 def list_account_and_users(accounts_users):
     if accounts_users:
         print("\n Lista de cadastrada:")
@@ -80,7 +85,7 @@ def list_account_and_users(accounts_users):
     else:
         print("\nNão há registros de cadastrados.")
     
-   
+##########################   DEPOSIT METHOD 
 def deposited(extract, number_account, account, deposit):
     check_account = next((count for count in account if count["Number Account"] == number_account), None)
 
@@ -97,13 +102,12 @@ def deposited(extract, number_account, account, deposit):
     check_account["Available balance"] += deposit
 
     extract += f"\nDepósito: + R$ {deposit} {today}"
-    print(f"\nDepósito: + R$ {deposit} {today}")
     print(f"Depósito realizado com sucesso. Saldo atual: R$ {check_account['Available balance']}")
 
     return check_account["Available balance"], extract
 
-
-def withdrawal(extract, withdraw, withdrawal_count, number_account, account):
+##########################   WITHDRAW METHOD 
+def withdrawal(extract="", withdraw=0, withdrawal_count=0, number_account="", account=[]):
     check_account = next((count for count in account if count["Number Account"] == number_account), None)
 
     if not check_account:
@@ -135,8 +139,9 @@ def withdrawal(extract, withdraw, withdrawal_count, number_account, account):
     print(f"Tens direito a 3 saques diarios. Número de saques: {withdrawal_count}/3")
 
     return check_account["Available balance"], extract, withdrawal_count
-        
-def bank_statement(credit_balance, extract = "extract"):
+
+##########################   METHOD TO EXTRACT BANK STATEMENT       
+def bank_statement(credit_balance, extract = ""):
     print("\n" + " Extracto Bancario ".center(50, "="))
     print(extract if extract else "Nenhuma transação realizada.")
     print(f"Saldo atual: R$ {credit_balance}")
@@ -199,7 +204,7 @@ def account_bank():
                 if valor_1_2 == 1:
                     number_account = input("Digite o nº da conta: ")
                     deposit = int(input("Digite a quantia a depositar: "))
-                    deposited(extract, number_account, account, deposit)
+                    credit_balance, extract = deposited(extract, number_account, account, deposit)
                     daily_count_limit += 1
                     print(f"Limite diario: {daily_count_limit}/10")
                                     
