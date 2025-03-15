@@ -14,7 +14,7 @@ def deposito(saldo, extrato, depositar):
 
 def levantamento(saldo, extrato, count_saque):
     if count_saque < LIMITE_DE_SAQUES:
-        sacar = int(input("Digite a quantia a sacar: "))
+        sacar = float(input("Digite a quantia a sacar: "))
         
         if sacar > saldo:
             print("Não tem saldo suficiente para realizar a operação")          
@@ -55,7 +55,7 @@ def conta_bancaria():
         valor = int(input("Digite o número da operação: "))
         
         if valor == 1:
-            depositar = int(input("Digite a quantia a depositar: "))
+            depositar = float(input("Digite a quantia a depositar: "))
             saldo, extrato = deposito(saldo, extrato, depositar)
             
         elif valor == 2:

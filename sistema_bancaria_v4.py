@@ -203,7 +203,7 @@ def account_bank():
                 
                 if valor_1_2 == 1:
                     number_account = input("Digite o nº da conta: ")
-                    deposit = int(input("Digite a quantia a depositar: "))
+                    deposit = float(input("Digite a quantia a depositar: "))
                     if not number_account or deposit <= 0:
                         print("Número de conta inválida o depósito inválido")
                         break
@@ -214,7 +214,7 @@ def account_bank():
                                     
                 elif valor_1_2 == 2:
                     number_account = input("Digite o nº da conta: ")
-                    withdraw = int(input("Digite a quantia a levantar: "))
+                    withdraw = float(input("Digite a quantia a levantar: "))
                     if not number_account or withdraw <= 0:
                         print("Número de conta inválida o depósito inválido")
                         break
