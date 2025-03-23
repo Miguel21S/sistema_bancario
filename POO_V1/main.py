@@ -3,7 +3,7 @@ from conta import ContaCorrente
 from transacao import Saque, Deposito
 
 def main():
-    cliente = PessoaFisica("João da Silva", "1990-01-01", "12345678900", "Rua A, 123")
+    cliente = PessoaFisica("Miguel", "1990-10-10", "46849148", "Rua A, 1234")
     conta = ContaCorrente.nova_conta(cliente, 1001)
     cliente.adicionar_conta(conta)
 
